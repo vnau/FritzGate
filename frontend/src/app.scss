@@ -1,0 +1,57 @@
+@use "@picocss/pico/scss/pico" with ($enable-semantic-container: true,
+  $enable-classes: true,
+  $modules: ("content/code": false,
+    "forms/input-color": false,
+    "forms/input-date": false,
+    "forms/input-file": false,
+    "forms/input-range": false,
+    "forms/input-search": false,
+    "components/accordion": true,
+    "components/card": true,
+    "components/grid": true,
+    "components/dropdown": false,
+    "components/loading": true,
+    "components/modal": false,
+    "components/nav": true,
+    "components/progress": true,
+    "components/tooltip": false,
+    "utilities/accessibility": false,
+    "utilities/reduce-motion": false));
+
+@import "./pico-theme.scss";
+@import "./pico-bootstrap.scss";
+
+.message-splash {
+  text-align: center;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 2rem;
+  max-width: 26em;
+}
+
+.wait-image {
+  height: 13em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+
+:root {
+  --line-height: 1.25;
+  --spacing: 0.66rem;
+  --typography-spacing-vertical: 1rem;
+  /*!!! all values in the file*/
+  --border-radius: 1.25rem;
+  --form-element-spacing-vertical: 0.6rem;
+  --form-element-spacing-horizontal: 0.7rem;
+  //   --pico-form-element-spacing-horizontal: 1rem;
+  --pico-form-element-spacing-vertical: 0;
+
+  body {
+    width: auto;
+    margin: 0.5em;
+  }
+}
+
+.strikeout {
+  text-decoration: line-through;
+}
