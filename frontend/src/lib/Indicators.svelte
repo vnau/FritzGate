@@ -2,8 +2,10 @@
   import humidityIcon from "../assets/humidity.svg";
   import temperatureIcon from "../assets/thermometer.svg";
   import heatIcon from "../assets/heating.svg";
-  import signalIcon from "../assets/signal.svg";
   import type { DeviceStatus } from "../interfaces";
+  import BatteryIcon from "./BatteryIcon.svelte";
+  import SignalIcon from "./SignalIcon.svelte";
+  import HumidityIcon from "./HumidityIcon.svelte";
 
   export let device: Partial<DeviceStatus>;
 </script>
@@ -27,16 +29,15 @@
   {:else}
     <div class="col" data-tooltip="Actual humidity {device.humidity}%">
       {#if device.humidity}
-        <img src={humidityIcon} alt="" />
+        <HumidityIcon value={device.humidity} />
         {Math.round(device.humidity)}%
       {/if}
     </div>
   {/if}
   <div class="col" data-tooltip="Signal strength {device.rssi} dB">
-    <img src={signalIcon} alt="" />
-    {device.rssi} dB
+    <SignalIcon value={device.rssi} />
   </div>
   <div class="col" data-tooltip="Battery status  {device.battery}%">
-    {device.battery}%
+    <BatteryIcon value={device.battery} />
   </div>
 </div>

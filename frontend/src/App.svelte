@@ -22,7 +22,12 @@
       const sensorsJson = await fetch(apiUrl + "status", {
         signal: controller.signal,
       });
-      data = await sensorsJson.json();
+      const newData = await sensorsJson.json();
+      // fix rssi 0 to undefined (not connected)
+      newData?.sensors?.forEach(
+        (s: any) => (s.rssi = s.rssi ? s.rssi : undefined!)
+      );
+      data = newData;
       busy = false;
     } catch {
       // request failed
