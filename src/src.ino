@@ -159,6 +159,42 @@ void updateThermostatBinding(const char *thermostatId, const char *sensorId)
   }
 }
 
+bool parseSensorAdvertisingMessage(BLEAdvertisedDevice &advertisedDevice, Sensor *sensor)
+{
+  bool rval = false;
+  std::string name = advertisedDevice.getName();
+  auto data = advertisedDevice.getManufacturerData();
+
+  if (name.rfind("GVH5075_", 0) == 0)
+  {
+    uint32_t climate = data[3] * 0x10000 + data[4] * 0x100 + data[5];
+    sensor->model = "H5075";
+    sensor->serial = name.substr(8);
+    sensor->temperature = climate / 1000;
+    sensor->humidity = climate % 1000;
+    sensor->battery = data[6] & 0x7F;
+    rval = true;
+  }
+  else if (name.rfind("Govee_H5179_", 0) == 0)
+  {
+    sensor->model = "H5179";
+    sensor->serial = name.substr(12);
+    sensor->temperature = (short(data[7]) << 8 | short(data[6])) / 10;
+    sensor->humidity = (int(data[9]) << 8 | int(data[8])) / 10;
+    sensor->battery = data[10];
+    rval = true;
+  }
+
+  if (rval)
+  {
+    sensor->id = name;
+    sensor->name = "Govee " + sensor->model + " " + sensor->serial;
+    sensor->rssi = advertisedDevice.getRSSI();
+  }
+
+  return rval;
+}
+
 /**
  * Scan for BLE servers and filter messages from Govee themperature sensors.
  */
@@ -169,16 +205,12 @@ class SensorsAdvertisedDeviceCallbacks : public BLEAdvertisedDeviceCallbacks
    */
   void onResult(BLEAdvertisedDevice advertisedDevice)
   {
-    std::string name = advertisedDevice.getName();
-    if (name.rfind("GVH5075", 0) == 0)
+    Sensor sensorData;
+    if (parseSensorAdvertisingMessage(advertisedDevice, &sensorData))
     {
       long timestamp = ntpClient.getEpochTime();
-      auto manufacturerData = advertisedDevice.getManufacturerData();
-      uint32_t encodedTemp = manufacturerData[3] * 0x10000 + manufacturerData[4] * 0x100 + manufacturerData[5];
-      uint8_t battery = manufacturerData[6] & 0x7F;
-      uint32_t temp = encodedTemp / 1000;
-      uint32_t humidity = encodedTemp % 1000;
-      Sensor *sensor = GetSensorById(name.c_str());
+
+      Sensor *sensor = GetSensorById(sensorData.id.c_str());
 
       long prevTimestamp;
       double prevTemperatureAvg;
@@ -198,20 +230,20 @@ class SensorsAdvertisedDeviceCallbacks : public BLEAdvertisedDeviceCallbacks
         prevTemperatureAvg = sensor->temperatureAvg;
       }
 
-      sensor->temperature = temp;
-      sensor->humidity = humidity;
-      sensor->model = "H5075";
-      sensor->serial = name.substr(8);
-      sensor->name = "Govee " + sensor->model + " " + sensor->serial;
-      sensor->id = name;
-      sensor->rssi = advertisedDevice.getRSSI();
-      sensor->battery = battery;
+      sensor->temperature = sensorData.temperature;
+      sensor->humidity = sensorData.humidity;
+      sensor->model = sensorData.model;
+      sensor->serial = sensorData.serial;
+      sensor->name = sensorData.name;
+      sensor->id = sensorData.id;
+      sensor->rssi = sensorData.rssi;
+      sensor->battery = sensorData.battery;
       sensor->timestamp = timestamp;
 
       // calculate exponential moving average for temperature
       long interval = 5 * 60; // interval in seconds
       double alpha = min(interval, abs(timestamp - prevTimestamp)) / (double)interval;
-      sensor->temperatureAvg = alpha * temp / 10.0 + (1 - alpha) * prevTemperatureAvg;
+      sensor->temperatureAvg = alpha * sensorData.temperature / 10.0 + (1 - alpha) * prevTemperatureAvg;
     }
   }
 };
