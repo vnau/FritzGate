@@ -1,7 +1,7 @@
 # FritzGate
 ## Introduction
 
-Welcome to the project **FritzGate** that transforms your **Ai Thinker board** into a smart thermostat controller. This project enables seamless control of thermostats connected to a **FRITZ!Box**, integrating third-party temperature sensors like **Govee H5075** for precise temperature control.
+Welcome to the project **FritzGate** that transforms your **Ai Thinker board** into a smart thermostat controller. This project enables seamless control of thermostats connected to a **FRITZ!Box**, integrating third-party temperature sensors **Govee H5075, H5100, H5174, H5177** for precise temperature control.
 
 ## Features
 
@@ -16,7 +16,7 @@ Welcome to the project **FritzGate** that transforms your **Ai Thinker board** i
 - **Can be Powered by FRITZ!Box:** Leverage the convenience of powering the device directly from the FRITZ!Box USB port, eliminating the need for additional space and power sources.
 - **Optimized for Climate Control with Govee Sensors:** Use Govee temperature sensors for precise climate control in living spaces, ensuring optimal comfort and energy savings.
 - **Embedded Web Server:** Easily manage thermostat-sensor bindings through the embedded web server, providing an intuitive interface for users to customize and monitor their smart heating system.
-- **Can be used without FRITZ!Box:** If you're not authorized in FritzBox, you can still monitor temperature and humidity from nearby Govee sensors, such as the H5075.
+- **Can be used without FRITZ!Box:** If you're not authorized in FritzBox, you can still monitor temperature and humidity from nearby Govee H5075, H5100, H5174, H5177.
 
 This project caters to users looking for a straightforward, cost-effective, and energy-efficient solution for smart thermostat control. With the added flexibility of integrating Govee temperature sensors, users can achieve optimal climate control in their living spaces. The easy configuration process and minimal hardware requirements make **FritzGate** an ideal choice for DIY enthusiasts seeking a hassle-free smart home solution.
 
