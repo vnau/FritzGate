@@ -6,23 +6,18 @@
   import BatteryIcon from "./BatteryIcon.svelte";
   import SignalIcon from "./SignalIcon.svelte";
   import HumidityIcon from "./HumidityIcon.svelte";
+  import TemperatureIcon from "./TemperatureIcon.svelte";
 
   export let device: Partial<DeviceStatus>;
 </script>
 
 <div class="row">
-  <div
-    class="col {device.referenceSensor ? 'strikeout' : ''}"
-    data-tooltip="Actual temperature {device.temperature}℃"
-  >
-    <img src={temperatureIcon} alt="" />
+  <div class="col {device.referenceSensor ? 'strikeout' : ''}" data-tooltip="Actual temperature {device.temperature}℃">
+    <TemperatureIcon value={device.temperature}/>
     {device.temperature}℃
   </div>
   {#if device.targetTemperature}
-    <div
-      class="col"
-      data-tooltip="Target temperature {device.targetTemperature}℃"
-    >
+    <div class="col" data-tooltip="Target temperature {device.targetTemperature}℃">
       <img src={heatIcon} alt="" />
       {device.targetTemperature}℃
     </div>

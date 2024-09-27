@@ -6,9 +6,7 @@
   export let sensors: SensorStatus[] | undefined;
   export let apiUrl: string;
 
-  async function onReferenceSensorChange(
-    event: Event & { currentTarget: EventTarget & HTMLSelectElement }
-  ) {
+  async function onReferenceSensorChange(event: Event & { currentTarget: EventTarget & HTMLSelectElement }) {
     const sensorId = event.currentTarget.getAttribute("data-sensor");
     const device = devices.find((dev) => dev.id === sensorId);
     const response = await fetch(apiUrl + "thermostat", {
@@ -44,20 +42,14 @@
 
         {#if sensors}
           <div class="row">
-            <div class="col-sm-4 col-md-4 col-lg-6 col-xl-6">
-              <select
-                bind:value={device.referenceSensor}
-                data-sensor={device.id}
-                on:change={onReferenceSensorChange}
-              >
+            <div class="col-sm-4 col-md-4 col-lg-6 col-xl-6 p-0">
+              <select bind:value={device.referenceSensor} data-sensor={device.id} on:change={onReferenceSensorChange}>
                 <option value="" selected={device.referenceSensor === ""}
                   >{device.model}
                   {device.serial} ({device.temperature}℃)</option
                 >
                 {#each sensors as sensor}
-                  <option
-                    selected={sensor.id === device.referenceSensor}
-                    value={sensor.id}
+                  <option selected={sensor.id === device.referenceSensor} value={sensor.id}
                     >{sensor.name} ({sensor.temperature}℃)</option
                   >
                 {/each}
