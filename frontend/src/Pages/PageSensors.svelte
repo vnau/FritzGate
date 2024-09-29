@@ -31,7 +31,7 @@
 {:else if sensors.length === 0}
   <WaitBox
     message="trying hard to find sensors nearby"
-    details="currently only Govee H5075 devices supported"
+    details="Fritzgate uses the Theengs Decoder, which supports over 70 models of temperature sensors."
   />
 {:else}
   <DevicesList devices={sensors} sensors={undefined} {apiUrl} />
