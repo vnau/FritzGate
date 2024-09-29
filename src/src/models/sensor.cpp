@@ -43,6 +43,8 @@ void Sensor::SerializeBody(Stream &client, long currentTimestamp, int indentLeve
     printIndent(client, indentLevel);
     client.printf("\"%s\": \"%s\",", nameof(serial), serial.c_str());
     printIndent(client, indentLevel);
+    client.printf("\"%s\": \"%s\",", nameof(data), data.c_str());
+    printIndent(client, indentLevel);
     client.printf("\"%s\": %d,", nameof(battery), battery);
     printIndent(client, indentLevel);
     client.printf("\"%s\": %d,", nameof(rssi), (int)((currentTimestamp - timestamp) > 15 ? 0 : rssi));
