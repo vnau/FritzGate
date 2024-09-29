@@ -25,6 +25,7 @@ std::string getTagValue(const char *payload, const char *startTag, const char *e
   return std::string(startPos, stopPos);
 }
 
+// FritzGate Session Constructor
 Session::Session(const char *host, int port, const char *username, const char *password)
     : mUsername(username),
       mPassword(password),
@@ -33,39 +34,43 @@ Session::Session(const char *host, int port, const char *username, const char *p
 {
 }
 
+// Destructor for FritzGate Session
 Session::~Session()
 {
 }
 
+// Get Session ID
 std::string Session::sid()
 {
   return mSID;
 }
 
+// Establish connection to FritzBox
 bool Session::establish_connection()
 {
   if (!query_challenge())
   {
-    Serial.println("error at query_challenge() occurred");
+    Serial.println("Error: Failed to query_challenge() for FritzBox connection.");
     return false;
   }
 
   if (!query_session_id())
   {
-    Serial.println("error at query_sessionID() occurred");
+    Serial.println("Error: Failed to query_sessionID() for FritzBox connection.");
     return false;
   }
 
   return true;
 }
 
+// Query Challenge for authentication
 bool Session::query_challenge()
 {
   HTTPClient http;
-  http.begin(client, fritz_host.c_str(), fritz_port, loginPath, false); // HTTP
+  http.begin(client, fritz_host.c_str(), fritz_port, loginPath, false); // Initiate HTTP connection
   int httpCode = http.GET();
   String payload;
-  // httpCode will be negative on error
+  // Check if HTTP request was successful
   if (httpCode > 0)
   {
     // HTTP header has been send and Server response header has been handled
@@ -89,12 +94,13 @@ bool Session::query_challenge()
   return true;
 }
 
+// Perform POST request with provided HTTPClient and path
 int Session::post_request(HTTPClient &http, const char *path, const char *post_template)
 {
   char post_data[70];
   snprintf(post_data, sizeof(post_data), post_template, mSID.c_str());
 
-  http.begin(client, fritz_host.c_str(), fritz_port, path, false); // HTTP
+  http.begin(client, fritz_host.c_str(), fritz_port, path, false); // Initiate HTTP connection
   http.addHeader("Content-Type", "application/x-www-form-urlencoded");
   int httpCode = http.POST((uint8_t *)post_data, strlen(post_data));
   Serial.println(post_data);
@@ -111,11 +117,13 @@ int Session::post_request(HTTPClient &http, const char *path, const char *post_t
   return httpCode;
 }
 
+// Query data with POST request
 String Session::query_data(const char *path, const char *post_template)
 {
   HTTPClient http;
   String payload;
   auto httpCode = post_request(http, path, post_template);
+  // Check if HTTP request was successful
   if (httpCode == HTTP_CODE_OK)
   {
     payload = http.getString();
@@ -124,13 +132,14 @@ String Session::query_data(const char *path, const char *post_template)
   return payload;
 }
 
+// Query devices and populate vector with thermostats
 bool Session::query_devices(std::vector<Thermostat> &thermostats)
 {
   Serial.println("query_devices()");
   HTTPClient http;
   // auto httpCode = post_request(http, "/myfritz/api/data.lua", "sid=%s&c=smarthome&a=getDevicesAndGroups");
   auto httpCode = post_request(http, "/data.lua", "xhr=1&sid=%s&lang=en&page=sh_control&xhrId=all");
-
+  // Check if HTTP request was successful
   if (httpCode == HTTP_CODE_OK)
   {
     auto stat = FritzThermostat::parseDevices(http, thermostats);
@@ -141,6 +150,7 @@ bool Session::query_devices(std::vector<Thermostat> &thermostats)
   return false;
 }
 
+// Query Session ID for authentication
 bool Session::query_session_id()
 {
   Serial.println("query_sessionID()");
@@ -149,7 +159,7 @@ bool Session::query_session_id()
   // Set POST Data
   std::string post_data = "username=" + mUsername + "&response=" + response;
   HTTPClient http;
-  http.begin(client, fritz_host.c_str(), fritz_port, loginPath, false); // HTTP
+  http.begin(client, fritz_host.c_str(), fritz_port, loginPath, false); // Initiate HTTP connection
   http.addHeader("Content-Type", "application/x-www-form-urlencoded");
   int httpCode = http.POST(String(post_data.c_str()));
   String payload;
@@ -189,10 +199,11 @@ bool Session::query_session_id()
   return true;
 }
 
+// Post thermostat state
 bool Session::post_thermostat_state(Thermostat &thermostat)
 {
   HTTPClient http;
-  http.begin(client, fritz_host.c_str(), fritz_port, "/data.lua", false); // HTTP
+  http.begin(client, fritz_host.c_str(), fritz_port, "/data.lua", false); // Initiate HTTP connection
   http.addHeader("Content-Type", "application/x-www-form-urlencoded");
   String postBody = FritzThermostat::getPostBody(thermostat, mSID.c_str());
   int httpCode = http.POST(postBody.c_str());

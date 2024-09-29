@@ -1,12 +1,12 @@
 # FritzGate
 ## Introduction
 
-Welcome to the project **FritzGate** that transforms your **Ai Thinker board** into a smart thermostat controller. This project enables seamless control of thermostats connected to a **FRITZ!Box**, integrating third-party temperature sensors **Govee H5075, H5100, H5174, H5177** for precise temperature control.
+Welcome to the project **FritzGate** that transforms your **Ai Thinker board** into a smart thermostat controller. This project enables seamless control of thermostats connected to a **FRITZ!Box**, integrating any of 70+ temperature sensors models for precise temperature control.
 
 ## Features
 
 - **FRITZ!Box integration:** Connect and control thermostats directly from Fritzbox. FritzGate does not affect weekly plans or other thermostat settings.
-- **Binding with external Temperature Sensors:** Utilize Govee temperature sensors placed in living spaces for precise temperature control in a room. FritzGate automatically corrects temperature offsets of thermostat sensors.
+- **Binding with external Temperature Sensors:** Utilize third party temperature sensors placed in living spaces for precise temperature control in a room. FritzGate automatically corrects temperature offsets of thermostat sensors.
 - **Embedded Web Server:** Easily manage thermostat-sensor bindings, monitor temperature and humidity through a user-friendly web interface.
 
 ## Advantages
@@ -14,18 +14,18 @@ Welcome to the project **FritzGate** that transforms your **Ai Thinker board** i
 - **Easy Configuration:** Set up effortlessly by scanning a QR code with the Ai Thinker camera for Wi-Fi credentials.
 - **Cost-Effective Hardware:** Utilize the budget-friendly and energy efficient ESP32-CAM board.
 - **Can be Powered by FRITZ!Box:** Leverage the convenience of powering the device directly from the FRITZ!Box USB port, eliminating the need for additional space and power sources.
-- **Optimized for Climate Control with Govee Sensors:** Use Govee temperature sensors for precise climate control in living spaces, ensuring optimal comfort and energy savings.
+- **Optimized for Climate Control with third party Sensors:** Use any of [70+ models](https://decoder.theengs.io/devices/devices.html) of temperature sensors for precise climate control in living spaces, ensuring optimal comfort and energy savings.
 - **Embedded Web Server:** Easily manage thermostat-sensor bindings through the embedded web server, providing an intuitive interface for users to customize and monitor their smart heating system.
-- **Can be used without FRITZ!Box:** If you're not authorized in FritzBox, you can still monitor temperature and humidity from nearby Govee H5075, H5100, H5174, H5177.
+- **Can be used without FRITZ!Box:** If you're not authorized in FritzBox, you can still monitor temperature and humidity from nearby temperature sensors.
 
-This project caters to users looking for a straightforward, cost-effective, and energy-efficient solution for smart thermostat control. With the added flexibility of integrating Govee temperature sensors, users can achieve optimal climate control in their living spaces. The easy configuration process and minimal hardware requirements make **FritzGate** an ideal choice for DIY enthusiasts seeking a hassle-free smart home solution.
+This project caters to users looking for a straightforward, cost-effective, and energy-efficient solution for smart thermostat control. With the added flexibility of integrating third party temperature sensors, users can achieve optimal climate control in their living spaces. The easy configuration process and minimal hardware requirements make **FritzGate** an ideal choice for DIY enthusiasts seeking a hassle-free smart home solution.
 
 ## Getting Started
 
 ### Hardware Requirements
 
 - Ai Thinker ESP32-CAM board
-- Govee temperature sensors
+- [Temperature sensors](https://decoder.theengs.io/devices/devices.html)
 - Fritzbox with compatible thermostats (optional)
 
 ### Installation Steps
