@@ -49,7 +49,11 @@ void FritzThermostat::printPostBody(Stream &stream, Thermostat &info, const char
     int i = 0;
     for (auto iter = info.weeklyTimetable.begin(); iter != info.weeklyTimetable.end(); iter++)
     {
-        stream.printf("&timer_item_%d=%02d%02d%%3B%d%%3B%d", i++, iter->hours(), iter->minutes(), iter->enabled() ? 1 : 0, iter->daysOfWeekMask());
+        stream.printf("&timer_item_%d=%02d%02d%%3B%d%%3B%d",
+                      i++,
+                      iter->hours(),
+                      iter->minutes(),
+                      iter->enabled() ? 1 : 0, iter->daysOfWeekMask());
     }
 
     const char *holiday = "&Holiday";
@@ -111,7 +115,7 @@ bool FritzThermostat::parseDevices(HTTPClient &http, std::vector<Thermostat> &th
         return false;
     }
 
-    DynamicJsonDocument device(10000);
+    DynamicJsonDocument device(15000);
     for (int i = 0; stream.find(i == 0 ? "[" : ",", 1); i++)
     {
         // Thermostat info;

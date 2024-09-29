@@ -11,6 +11,7 @@ public:
     std::string id;
     std::string model;
     std::string serial;
+    std::string data;
 
     uint32_t temperature;
     double temperatureAvg;

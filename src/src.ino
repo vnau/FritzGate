@@ -3,7 +3,10 @@
 #include "./src/fritz/fritz_session.h"
 #include "./src/fritz/fritz_thermostat.h"
 #include "./src/models/sensor.h"
-#include <BLEDevice.h>
+#include "./src/bluetooth/SensorsScanner.h"
+#include "./src/bluetooth/GoveeSensorsScanner.h"
+#include "./src/bluetooth/TheengsSensorsScanner.h"
+
 #include <EEPROM.h>
 #include <esp_http_server.h> //TODO
 #include <HTTPClient.h>
@@ -23,7 +26,7 @@
 
 // ledPin refers to ESP32-CAM GPIO 4 (flashlight)
 #define FLASH_GPIO_NUM 4
-#define MAX_SENSORS_COUNT 10
+#define MAX_SENSORS_COUNT 20
 #define MAX_ID_LENGTH 16
 #define NTP_SERVER "europe.pool.ntp.org"
 #define DEFAULT_FRITZBOX_HOST "fritz.box"
@@ -159,114 +162,53 @@ void updateThermostatBinding(const char *thermostatId, const char *sensorId)
   }
 }
 
-bool parseSensorAdvertisingMessage(BLEAdvertisedDevice &advertisedDevice, Sensor *sensor)
-{
-  bool rval = false;
-  std::string name = advertisedDevice.getName();
-  auto data = advertisedDevice.getManufacturerData();
-
-  if (name.rfind("GVH5075_", 0) == 0)
-  {
-    uint32_t climate = data[3] * 0x10000 + data[4] * 0x100 + data[5];
-    sensor->model = name.substr(2, 5);
-    sensor->serial = name.substr(8);
-    sensor->temperature = climate / 1000;
-    sensor->humidity = climate % 1000;
-    sensor->battery = data[6] & 0x7F;
-    rval = true;
-  }
-  else if (name.rfind("GVH5177_", 0) == 0 || name.rfind("GVH5174_", 0) == 0 || name.rfind("GVH5100_", 0) == 0)
-  {
-    // It appears that the H5174 uses the exact same data format as the H5177, with the difference being the broadcase name starting with GVH5174_
-    uint32_t climate = data[4] * 0x10000 + data[5] * 0x100 + data[6];
-    sensor->model = name.substr(2, 5);
-    sensor->serial = name.substr(8);
-    sensor->temperature = climate / 1000;
-    sensor->humidity = climate % 1000;
-    sensor->battery = data[7];
-    rval = true;
-  }
-  else if (name.rfind("Govee_H5151_", 0) == 0)
-  {
-    // H5151 does not advertise data, so it is not supported
-    sensor->model = name.substr(6, 5);
-    sensor->serial = name.substr(12);
-    sensor->temperature = 0;
-    sensor->humidity = 0;
-    sensor->battery = 100;
-    rval = true;
-  }
-  else if (name.rfind("Govee_H5179_", 0) == 0)
-  {
-    sensor->model = name.substr(6, 5);
-    sensor->serial = name.substr(12);
-    sensor->temperature = (short(data[7]) << 8 | short(data[6])) / 10;
-    sensor->humidity = (int(data[9]) << 8 | int(data[8])) / 10;
-    sensor->battery = data[10];
-    rval = true;
-  }
-
-  if (rval)
-  {
-    // Serial.printf("Advertising: %s\r\n", advertisedDevice.toString().c_str());
-    sensor->id = name;
-    sensor->name = "Govee " + sensor->model + " " + sensor->serial;
-    sensor->rssi = advertisedDevice.getRSSI();
-  }
-
-  return rval;
-}
-
 /**
- * Scan for BLE servers and filter messages from Govee themperature sensors.
+ * Scan for BLE servers and filter messages from themperature sensors.
  */
-class SensorsAdvertisedDeviceCallbacks : public BLEAdvertisedDeviceCallbacks
+class SensorsAdvertisedDeviceCallbacks : public SensorScannerCallback
 {
   /**
    * Called for each advertising BLE server.
    */
-  void onResult(BLEAdvertisedDevice advertisedDevice)
+  void onResult(Sensor *sensorData)
   {
-    Sensor sensorData;
-    if (parseSensorAdvertisingMessage(advertisedDevice, &sensorData))
+    long timestamp = ntpClient.getEpochTime();
+
+    Sensor *sensor = GetSensorById(sensorData->id.c_str());
+
+    long prevTimestamp;
+    double prevTemperatureAvg;
+
+    if (!sensor)
     {
-      long timestamp = ntpClient.getEpochTime();
+      if (sensorsCount >= MAX_SENSORS_COUNT)
+        return;
+      sensor = sensors[sensorsCount++] = new Sensor();
 
-      Sensor *sensor = GetSensorById(sensorData.id.c_str());
-
-      long prevTimestamp;
-      double prevTemperatureAvg;
-
-      if (!sensor)
-      {
-        if (sensorsCount >= MAX_SENSORS_COUNT)
-          return;
-        sensor = sensors[sensorsCount++] = new Sensor();
-
-        prevTimestamp = 0;
-        prevTemperatureAvg = 0;
-      }
-      else
-      {
-        prevTimestamp = sensor->timestamp;
-        prevTemperatureAvg = sensor->temperatureAvg;
-      }
-
-      sensor->temperature = sensorData.temperature;
-      sensor->humidity = sensorData.humidity;
-      sensor->model = sensorData.model;
-      sensor->serial = sensorData.serial;
-      sensor->name = sensorData.name;
-      sensor->id = sensorData.id;
-      sensor->rssi = sensorData.rssi;
-      sensor->battery = sensorData.battery;
-      sensor->timestamp = timestamp;
-
-      // calculate exponential moving average for temperature
-      long interval = 5 * 60; // interval in seconds
-      double alpha = min(interval, abs(timestamp - prevTimestamp)) / (double)interval;
-      sensor->temperatureAvg = alpha * sensorData.temperature / 10.0 + (1 - alpha) * prevTemperatureAvg;
+      prevTimestamp = 0;
+      prevTemperatureAvg = 0;
     }
+    else
+    {
+      prevTimestamp = sensor->timestamp;
+      prevTemperatureAvg = sensor->temperatureAvg;
+    }
+
+    sensor->temperature = sensorData->temperature;
+    sensor->humidity = sensorData->humidity;
+    sensor->model = sensorData->model;
+    sensor->serial = sensorData->serial;
+    sensor->name = sensorData->name;
+    sensor->id = sensorData->id;
+    sensor->rssi = sensorData->rssi;
+    sensor->battery = sensorData->battery;
+    sensor->timestamp = timestamp;
+    sensor->data = sensorData->data;
+
+    // calculate exponential moving average for temperature
+    long interval = 5 * 60; // interval in seconds
+    double alpha = min(interval, abs(timestamp - prevTimestamp)) / (double)interval;
+    sensor->temperatureAvg = alpha * sensorData->temperature / 10.0 + (1 - alpha) * prevTemperatureAvg;
   }
 };
 
@@ -372,13 +314,13 @@ void setupHTTPD()
  */
 void setupBLE()
 {
-  BLEDevice::init(DEVICE_HOSTNAME);
+  // SensorsScanner *pBLEScan = GoveeSensorsScanner::getScan(); // legacy scanner for Govee sensors
+  SensorsScanner *pBLEScan = TheengsSensorsScanner::getScan();
+  pBLEScan->init(DEVICE_HOSTNAME);
 
   // Retrieve a Scanner and set the callback we want to use to be informed when we
   // have detected a new device.
-  BLEScan *pBLEScan = BLEDevice::getScan();
-  pBLEScan->setAdvertisedDeviceCallbacks(new SensorsAdvertisedDeviceCallbacks(), true, true);
-  pBLEScan->start(0, nullptr, false);
+  pBLEScan->start(new SensorsAdvertisedDeviceCallbacks());
 }
 
 /**
