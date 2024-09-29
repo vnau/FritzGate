@@ -26,6 +26,7 @@ public:
     void onResult(BLEAdvertisedDevice *advertisedDevice) override
     {
         // Serial.printf("Advertised Device: %s \n", advertisedDevice->toString().c_str());
+        doc.clear();
         JsonObject BLEdata = doc.to<JsonObject>();
         String mac_adress = advertisedDevice->getAddress().toString().c_str();
         mac_adress.toUpperCase();
@@ -53,9 +54,9 @@ public:
             for (int j = 0; j < serviceDataCount; j++)
             {
                 std::string service_data = convertServiceData(advertisedDevice->getServiceData(j));
-                BLEdata["servicedata"] = (char *)service_data.c_str();
+                BLEdata["servicedata"] = service_data;
                 std::string serviceDatauuid = advertisedDevice->getServiceDataUUID(j).toString();
-                BLEdata["servicedatauuid"] = (char *)serviceDatauuid.c_str();
+                BLEdata["servicedatauuid"] = serviceDatauuid;
             }
         }
 
@@ -68,7 +69,7 @@ public:
                 Serial.println("");
 
                 Sensor sensorData;
-                auto brand = BLEdata.containsKey("batt") ? BLEdata["brand"].as<std::string>() : "";
+                auto brand = BLEdata.containsKey("brand") ? BLEdata["brand"].as<std::string>() : "";
                 auto model = BLEdata.containsKey("model") ? BLEdata["model"].as<std::string>() : "";
                 auto model_id = BLEdata.containsKey("model_id") ? BLEdata["model_id"].as<std::string>() : "";
                 auto name = BLEdata.containsKey("name") ? BLEdata["name"].as<std::string>() : "";
@@ -104,7 +105,7 @@ public:
 
     void init(const std::__cxx11::string deviceName) override
     {
-        BLEDevice::setScanFilterMode(CONFIG_BTDM_SCAN_DUPL_TYPE_DEVICE);
+        BLEDevice::setScanFilterMode(CONFIG_BTDM_SCAN_DUPL_TYPE_DATA_DEVICE);
         BLEDevice::setScanDuplicateCacheSize(200);
         BLEDevice::init(deviceName);
     }

@@ -27,7 +27,7 @@
 // ledPin refers to ESP32-CAM GPIO 4 (flashlight)
 #define FLASH_GPIO_NUM 4
 #define MAX_SENSORS_COUNT 20
-#define MAX_ID_LENGTH 16
+#define MAX_ID_LENGTH 18
 #define NTP_SERVER "europe.pool.ntp.org"
 #define DEFAULT_FRITZBOX_HOST "fritz.box"
 #define DEVICE_HOSTNAME "fritzgate"
@@ -55,7 +55,7 @@ struct Config
   char fritz_pass[32] = {};
 
   // sensors bindings
-  char sensors_bindings[MAX_SENSORS_COUNT][2][16] = {};
+  char sensors_bindings[MAX_SENSORS_COUNT][2][MAX_ID_LENGTH] = {};
 };
 
 Config defaultConfig;
