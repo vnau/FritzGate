@@ -78,6 +78,7 @@ const char FRITZ_STATUS_FAILURE[] = "FAILURE";
 const char *fritzStatus = FRITZ_STATUS_NOT_CONFIGURED;
 
 WiFiUDP ntpUDP;
+Session fritzSession(DEFAULT_FRITZBOX_HOST, 80, "", "");
 WiFiServer server(80);
 NTPClient ntpClient(ntpUDP, NTP_SERVER, 3600, 60000);
 
@@ -217,13 +218,12 @@ class SensorsAdvertisedDeviceCallbacks : public SensorScannerCallback
  */
 bool syncFritzBox()
 {
-  Session session(config.fritz_host, 80, config.fritz_user, config.fritz_pass);
   fritzStatus = FRITZ_STATUS_CONNECTION;
-  if (session.establish_connection())
+  if (fritzSession.ensure_connection())
   {
     fritzStatus = FRITZ_STATUS_CONNECTED;
     bool updates = false;
-    session.query_devices(thermostats);
+    fritzSession.query_devices(thermostats);
     auto timestamp = ntpClient.getEpochTime();
     for (auto iter = thermostats.begin(); iter != thermostats.end(); iter++)
     {
@@ -250,9 +250,9 @@ bool syncFritzBox()
           iter->offset = offset;
           iter->offsetTimestamp = ntpClient.getEpochTime();
 
-          FritzThermostat::printPostBody(Serial, *iter, session.sid().c_str());
+          FritzThermostat::printPostBody(Serial, *iter, fritzSession.sid().c_str());
 
-          session.post_thermostat_state(*iter);
+          fritzSession.post_thermostat_state(*iter);
           updates = true;
         }
       }
@@ -260,7 +260,7 @@ bool syncFritzBox()
 
     if (updates)
     {
-      bool result = session.query_devices(thermostats);
+      bool result = fritzSession.query_devices(thermostats);
       auto timestamp = ntpClient.getEpochTime();
       for (auto iter = thermostats.begin(); iter != thermostats.end(); iter++)
       {
@@ -440,6 +440,7 @@ void setup()
       strlen(config.fritz_pass) > 0)
     fritzStatus = FRITZ_STATUS_CONFIGURED;
 
+  fritzSession.configure(config.fritz_host, 80, config.fritz_user, config.fritz_pass);
   setupWIFI();
   setupBLE();
   setupHTTPD();
@@ -537,6 +538,7 @@ void loop()
               strncpy(config.fritz_pass, pass, sizeof(config.fritz_pass));
               fritzStatus = FRITZ_STATUS_CONFIGURED;
               saveConfig();
+              fritzSession.configure(config.fritz_host, 80, config.fritz_user, config.fritz_pass);
             }
 
             writeJsonHeaders(client);
