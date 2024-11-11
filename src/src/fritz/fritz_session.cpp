@@ -29,8 +29,18 @@ std::string getTagValue(const char *payload, const char *startTag, const char *e
 Session::Session(const char *host, int port, const char *username, const char *password)
     : mUsername(username),
       mPassword(password),
-      fritz_host(host),
-      fritz_port(port)
+      mHost(host),
+      mPort(port),
+      mTimeTillLogout(1100)
+{
+}
+
+Session::Session()
+    : mUsername(""),
+      mPassword(""),
+      mHost("fritz.box"),
+      mPort(80),
+      mTimeTillLogout(1100)
 {
 }
 
@@ -45,9 +55,35 @@ std::string Session::sid()
   return mSID;
 }
 
-// Establish connection to FritzBox
-bool Session::establish_connection()
+void Session::reset_session()
 {
+  mSID = "";
+  mSessionExpiration = 0;
+}
+
+void Session::configure(const char *host, int port, const char *username, const char *password)
+{
+  mHost = host;
+  mPort = port;
+  mUsername = username;
+  mPassword = password;
+  reset_session();
+}
+
+// Establish connection to FritzBox
+bool Session::ensure_connection()
+{
+  if (mHost == "" || mUsername == "" || mPassword == "")
+  {
+    Serial.println("Error: Failed to connect FritzBox: no credentials.");
+    return false;
+  }
+
+  if (mSID != "" && mSessionExpiration > std::time(nullptr))
+  {
+    return true;
+  }
+
   if (!query_challenge())
   {
     Serial.println("Error: Failed to query_challenge() for FritzBox connection.");
@@ -60,6 +96,7 @@ bool Session::establish_connection()
     return false;
   }
 
+  mSessionExpiration = std::time(nullptr) + mTimeTillLogout;
   return true;
 }
 
@@ -67,7 +104,7 @@ bool Session::establish_connection()
 bool Session::query_challenge()
 {
   HTTPClient http;
-  http.begin(client, fritz_host.c_str(), fritz_port, loginPath, false); // Initiate HTTP connection
+  http.begin(client, mHost.c_str(), mPort, loginPath, false); // Initiate HTTP connection
   int httpCode = http.GET();
   String payload;
   // Check if HTTP request was successful
@@ -100,7 +137,7 @@ int Session::post_request(HTTPClient &http, const char *path, const char *post_t
   char post_data[70];
   snprintf(post_data, sizeof(post_data), post_template, mSID.c_str());
 
-  http.begin(client, fritz_host.c_str(), fritz_port, path, false); // Initiate HTTP connection
+  http.begin(client, mHost.c_str(), mPort, path, false); // Initiate HTTP connection
   http.addHeader("Content-Type", "application/x-www-form-urlencoded");
   int httpCode = http.POST((uint8_t *)post_data, strlen(post_data));
   Serial.println(post_data);
@@ -108,10 +145,16 @@ int Session::post_request(HTTPClient &http, const char *path, const char *post_t
   if (httpCode > 0)
   {
     // HTTP header has been sent and Server response header has been handled
+    if (httpCode == HTTP_CODE_OK)
+    {
+      // update session after successful request
+      mSessionExpiration = std::time(nullptr) + mTimeTillLogout;
+    }
     Serial.printf("[HTTP] POST %s... code: %d\n", path, httpCode);
   }
   else
   {
+    reset_session();
     Serial.printf("[HTTP] POST... failed, error: %s\n", http.errorToString(httpCode).c_str());
   }
   return httpCode;
@@ -159,7 +202,7 @@ bool Session::query_session_id()
   // Set POST Data
   std::string post_data = "username=" + mUsername + "&response=" + response;
   HTTPClient http;
-  http.begin(client, fritz_host.c_str(), fritz_port, loginPath, false); // Initiate HTTP connection
+  http.begin(client, mHost.c_str(), mPort, loginPath, false); // Initiate HTTP connection
   http.addHeader("Content-Type", "application/x-www-form-urlencoded");
   int httpCode = http.POST(String(post_data.c_str()));
   String payload;
@@ -203,7 +246,7 @@ bool Session::query_session_id()
 bool Session::post_thermostat_state(Thermostat &thermostat)
 {
   HTTPClient http;
-  http.begin(client, fritz_host.c_str(), fritz_port, "/data.lua", false); // Initiate HTTP connection
+  http.begin(client, mHost.c_str(), mPort, "/data.lua", false); // Initiate HTTP connection
   http.addHeader("Content-Type", "application/x-www-form-urlencoded");
   String postBody = FritzThermostat::getPostBody(thermostat, mSID.c_str());
   int httpCode = http.POST(postBody.c_str());
