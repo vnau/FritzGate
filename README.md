@@ -1,7 +1,5 @@
 # FritzGate
-## Introduction
-
-Welcome to the project **FritzGate** that transforms your **Ai Thinker board** into a smart thermostat controller. This project enables seamless control of thermostats connected to a **FRITZ!Box**, integrating any of 70+ temperature sensors models for precise temperature control.
+**FritzGate** transforms your **Ai Thinker board** into a smart thermostat controller. This project enables seamless control of thermostats connected to a **FRITZ!Box**, integrating any of 70+ temperature sensors models for precise temperature control.
 
 ## Features
 
@@ -48,7 +46,3 @@ This project caters to users looking for a straightforward, cost-effective, and 
    - Upload the code to your Ai Thinker ESP32-CAM board.
 
 5. Access the web interface by navigating to the assigned IP address in your web browser.
-
-## Customization
-
-Feel free to customize the code to suit your specific requirements. You can add additional features, integrate more IoT devices, or enhance automation rules.
