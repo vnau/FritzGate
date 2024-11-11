@@ -22,9 +22,14 @@
     {title}
     {titleLeft}
     {titleRight}
+	rangeStart={temperature}
+	rangeStop={21}
     --stroke-color="#f2c894"
   >
-    <CircularSlider bind:value={humidity} min={0} max={100} stroke={10} --stroke-color="#9fc0de">
+    <CircularSlider bind:value={humidity} min={0} max={100} stroke={10}
+	rangeStart={40}
+	rangeStop={60}
+	--stroke-color="#9fc0de">
       <div class="slider-content">
         <span style="white-space:nowrap"
           ><TemperatureIcon value={temperature} />{temperature.toLocaleString(undefined, {

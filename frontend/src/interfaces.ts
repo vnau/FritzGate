@@ -14,6 +14,7 @@ export interface SensorStatus {
 
 export interface StatusData {
     sensors: SensorStatus[];
+    thermostats: DeviceStatus[];
 }
 
 export interface DeviceStatus extends SensorStatus {

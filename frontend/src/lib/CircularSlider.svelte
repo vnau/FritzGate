@@ -5,6 +5,8 @@
   export let value: number;
   export let min: number = 0;
   export let max: number = 100;
+  export let rangeStart: number = 0;
+  export let rangeStop: number = 100;
   export let stroke = 20;
   export let title = "";
   export let titleLeft = "";
@@ -59,11 +61,25 @@
     {@const border2 = border + stroke / 2}
     {@const x = calcX(radius, border2, value)}
     {@const y = calcY(radius, border2, value)}
+	{@const x1 = calcX(radius, border2, 21)}
+    {@const y1 = calcY(radius, border2, 21)}
 
     <svg class="slider-svg" style="" xmlns="http://www.w3.org/2000/svg">
       <circle class="slider-circle" cx={radius} cy={radius} r={radius - stroke / 2 - border} />
       <path class="slider-arc" d={calcCurve(radius, border2, 0, valueToAngle(value))} />
+	  
+	  <!--path class="slider-arc" d={calcCurve(radius, border2,  valueToAngle(40), valueToAngle(60))} />
+	  <path class="slider-range" d={calcCurve(radius, border2,  valueToAngle(40), valueToAngle(60))} /-->
+
+  	  <path class="slider-range-bg" d={calcCurve(radius, border2,  valueToAngle(rangeStart), valueToAngle(rangeStop))} />
+	  <path class="slider-range" d={calcCurve(radius, border2,  valueToAngle(rangeStart), valueToAngle(rangeStop))} />
+
+	  
+  	  <!--path class="slider-arc" d={calcCurve(radius, border2,  valueToAngle(value), valueToAngle(value+0.5))} />
+	  <path class="slider-range" d={calcCurve(radius, border2,  valueToAngle(value), valueToAngle(value+0.5))} /-->
+
       <circle class="slider-handle" cx={x} cy={y} r={stroke / 2} />
+      <!--<circle class="slider-handle slider-handle-1" cx={x1} cy={y1} r={stroke / 2} />-->
 
       {#if visible}
         <g in:spin>
@@ -142,6 +158,21 @@
     stroke-width: var(--slider-stroke);
   }
 
+.slider-range{
+    opacity: 50%;
+    fill: none;
+    stroke: white;
+    stroke-width: calc(var(--slider-stroke) - 2px);
+    stroke-linecap: round;
+}
+
+ .slider-range-bg {
+    fill: none;
+    stroke: var(--stroke-color);
+    stroke-width: var(--slider-stroke);
+    stroke-linecap: round;
+  }
+
   .slider-arc {
     fill: none;
     stroke: var(--stroke-color);
@@ -161,10 +192,19 @@
     height: calc(100% - 2 * var(--slider-border));
     margin: calc(var(--slider-stroke) + var(--slider-border)); */
   }
+  
+  .slider-handle-1 {
+    opacity: 40%;
+/*    fill: tomato !important;*/
+	fill: white !important;
+/*	stroke: white !important;*/
+  }
+  
   .slider-handle {
     fill: white;
     stroke: var(--stroke-color);
     stroke-width: 1px;
+    transition: r 0.5s ease-out; /* Smooth animation */
   }
 
   .slider-title-curve {

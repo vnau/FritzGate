@@ -1,50 +1,56 @@
 <script lang="ts">
-  import type { DeviceStatus } from "../interfaces";
-  import DevicesList from "../lib/DevicesList.svelte";
+  import type { DeviceStatus, SensorStatus, StatusData } from "../interfaces";
   import WaitBox from "../lib/WaitBox.svelte";
   import Indicator from "../lib/Indicator.svelte";
 
-  export let apiUrl: string;
-  export let data: any;
+  export let data: StatusData | null = null;
+  let sensors: SensorStatus[] | null = null;
+  let thermostats: DeviceStatus[] = [];
+  let timestamp: number = 0;
 
-  let sensors: DeviceStatus[] | null = null;
-  var timestamp = 0;
-  $: {
-    if (data) {
-      ({ sensors } = data);
-      timestamp =
-        sensors && sensors.length > 0
-          ? Math.max(...sensors.sort((a, b) => a.id.localeCompare(b.id)).map((v) => v.seriesTimestamp))
-          : 0;
+  $: updateSensorsAndTimestamp(data);
+
+  // Function to update sensors data
+  function updateSensorsAndTimestamp(data: StatusData | null) {
+    if (data && data.sensors) {
+      thermostats = data.thermostats ?? [];
+      sensors = data.sensors ?? [];
+      if (data.sensors.length > 0) {
+        data.sensors.sort((a, b) => a.id.localeCompare(b.id));
+        timestamp = Math.max(...data.sensors.map((v) => v.seriesTimestamp));
+      } else {
+        timestamp = 0;
+      }
+    } else {
+      sensors = null;
     }
   }
 </script>
 
-{#if !sensors}
-  <WaitBox message="trying to connect to the gateway" details="this buddy gossips too much with the sensors" />
+{#if sensors === null}
+  <WaitBox
+    message="trying to connect to the gateway"
+    details="this buddy gossips too much with the sensors"
+  />
 {:else if sensors.length === 0}
   <WaitBox
     message="trying hard to find sensors nearby"
     details="Fritzgate uses the Theengs Decoder, which supports over 70 models of temperature sensors."
   />
 {:else}
-  <!-- <DevicesList devices={sensors} sensors={undefined} {apiUrl} /> -->
+  <article class="devices-list">
+    <div class="row">
+      {#each sensors as sensor}
+        <div class="col-6 col-xs-6 col-sm-6 col-md-4 col-lg-3 col-xl-3 p-0">
+          <Indicator
+            temperature={sensor.temperature}
+            humidity={Math.round(sensor.humidity)}
+            title={thermostats.find(v=>v.referenceSensor == sensor.id)?.name ?? "Unknown"}
+            titleLeft={sensor.data}
+            titleRight={sensor.name}
+          />
+        </div>
+      {/each}
+    </div>
+  </article>
 {/if}
-<!-- <input type="range" bind:value={temperature} min={10} max={30} step={0.1} />
-<input type="range" bind:value={humidity} min={0} max={100} step={0.1} /> -->
-<article class="devices-list">
-<span style="" class="row">
-  {#each sensors ?? [] as sensor}
-  <div class="col-6 col-sm-6 col-md-4 col-lg-3 p-0">
-    <Indicator
-      temperature={sensor.temperature}
-      humidity={Math.round(sensor.humidity)}
-      title={"Living room"}
-      titleLeft={sensor.data}
-      titleRight={sensor.name}
-    />
-  </div>
-  {/each}
-  <!-- <Indicator {temperature} {humidity} title={"Kitchen"} /> -->
-</span>
-</article>

@@ -32,10 +32,10 @@
       <summary class="secondary">
         <div class="row">
           <!-- <span>{name}</span> -->
-          <div class="col-sm-4 col-md-4 col-lg-6 col-xl-6">
+          <div class="col-4 col-sm-4 col-md-4 col-lg-6 col-xl-6">
             <b>{device.name}</b>
           </div>
-          <div class="col-sm-8 col-md-8 col-lg-6 col-xl-6">
+          <div class="col-8 col-sm-8 col-md-8 col-lg-6 col-xl-6">
             <Indicators {device} />
           </div>
         </div>
