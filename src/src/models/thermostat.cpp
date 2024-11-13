@@ -1,5 +1,5 @@
 #include "thermostat.h"
-#include "Sensor.h"
+#include "sensor.h"
 
 const char *nameof_typecheck(const void *, const char *name) { return name; }
 #define nameof(A) nameof_typecheck((void *)&A, #A)
