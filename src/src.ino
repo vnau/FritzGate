@@ -64,7 +64,7 @@ Config config = {};
 // json with fritzbox smart home control settings
 unsigned long fritzSmartHomeControlLastRefreshMillis = 0;
 
-char buffer[5 * 4 * 2 * 60 * 24 / 5] = {};
+//char buffer[5 * 4 * 2 * 60 * 24 / 5] = {}; // overflowed by 1136 bytes
 
 static int sensorsCount = 0;
 static Sensor *sensors[MAX_SENSORS_COUNT] = {};
