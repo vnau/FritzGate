@@ -30,9 +30,12 @@
     };
   }
 
-  const valueToAngle = (value: number) => (2 * Math.PI * (Math.max(min, Math.min(max, value)) - min)) / (max - min);
-  const calcAngX = (radius: number, stroke: number, angle: number) => radius - (radius - stroke) * Math.sin(angle);
-  const calcAngY = (radius: number, stroke: number, angle: number) => radius + (radius - stroke) * Math.cos(angle);
+  const valueToAngle = (value: number) =>
+    (2 * Math.PI * (Math.max(min, Math.min(max, value)) - min)) / (max - min);
+  const calcAngX = (radius: number, stroke: number, angle: number) =>
+    radius - (radius - stroke) * Math.sin(angle);
+  const calcAngY = (radius: number, stroke: number, angle: number) =>
+    radius + (radius - stroke) * Math.cos(angle);
 
   const calcX = (radius: number, stroke: number, value: number) =>
     Math.round(calcAngX(radius, stroke, valueToAngle(value)) * 1000) / 1000;
@@ -43,7 +46,7 @@
   const calcCurve = (radius: number, border: number, a: number, b: number) =>
     `M ${calcAngX(radius, border, a)} ${calcAngY(radius, border, a)} A 
     ${radius - border} ${radius - border} 
-    0 ${b - a > Math.PI ? 1 : 0} 1 ${calcAngX(radius, border, b)} ${calcAngY(radius, border, b)}`;
+    0 ${b - a > Math.PI ? 1 : 0} ${a > b ? 0 : 1} ${calcAngX(radius, border, b)} ${calcAngY(radius, border, b)}`;
 </script>
 
 <div
@@ -52,7 +55,7 @@
   bind:clientHeight
   style="--slider-stroke: {stroke}px; --slider-border: {border}px; --slider-radius:{Math.min(
     clientWidth,
-    clientHeight,
+    clientHeight
   ) / 2}px"
   id="sliderHandle"
 >
@@ -61,21 +64,44 @@
     {@const border2 = border + stroke / 2}
     {@const x = calcX(radius, border2, value)}
     {@const y = calcY(radius, border2, value)}
-	{@const x1 = calcX(radius, border2, 21)}
+    {@const x1 = calcX(radius, border2, 21)}
     {@const y1 = calcY(radius, border2, 21)}
 
     <svg class="slider-svg" style="" xmlns="http://www.w3.org/2000/svg">
-      <circle class="slider-circle" cx={radius} cy={radius} r={radius - stroke / 2 - border} />
-      <path class="slider-arc" d={calcCurve(radius, border2, 0, valueToAngle(value))} />
-	  
-	  <!--path class="slider-arc" d={calcCurve(radius, border2,  valueToAngle(40), valueToAngle(60))} />
+      <circle
+        class="slider-circle"
+        cx={radius}
+        cy={radius}
+        r={radius - stroke / 2 - border}
+      />
+      <path
+        class="slider-arc"
+        d={calcCurve(radius, border2, 0, valueToAngle(value))}
+      />
+
+      <!--path class="slider-arc" d={calcCurve(radius, border2,  valueToAngle(40), valueToAngle(60))} />
 	  <path class="slider-range" d={calcCurve(radius, border2,  valueToAngle(40), valueToAngle(60))} /-->
 
-  	  <path class="slider-range-bg" d={calcCurve(radius, border2,  valueToAngle(rangeStart), valueToAngle(rangeStop))} />
-	  <path class="slider-range" d={calcCurve(radius, border2,  valueToAngle(rangeStart), valueToAngle(rangeStop))} />
+      <path
+        class="slider-range-bg"
+        d={calcCurve(
+          radius,
+          border2,
+          valueToAngle(rangeStart),
+          valueToAngle(rangeStop)
+        )}
+      />
+      <path
+        class="slider-range"
+        d={calcCurve(
+          radius,
+          border2,
+          valueToAngle(rangeStart),
+          valueToAngle(rangeStop)
+        )}
+      />
 
-	  
-  	  <!--path class="slider-arc" d={calcCurve(radius, border2,  valueToAngle(value), valueToAngle(value+0.5))} />
+      <!--path class="slider-arc" d={calcCurve(radius, border2,  valueToAngle(value), valueToAngle(value+0.5))} />
 	  <path class="slider-range" d={calcCurve(radius, border2,  valueToAngle(value), valueToAngle(value+0.5))} /-->
 
       <circle class="slider-handle" cx={x} cy={y} r={stroke / 2} />
@@ -86,14 +112,26 @@
           <path
             class="slider-title-curve"
             id="curveTop"
-            d={calcCurve(radius, border - 2, (2 * Math.PI) / 3, (4 * Math.PI) / 3)}
+            d={calcCurve(
+              radius,
+              border - 2,
+              (2 * Math.PI) / 3,
+              (4 * Math.PI) / 3
+            )}
           />
           <text
-            ><textPath class="slider-title" xlink:href="#curveTop" startOffset="50%" text-anchor="middle"
-              >{title}</textPath
+            ><textPath
+              class="slider-title"
+              xlink:href="#curveTop"
+              startOffset="50%"
+              text-anchor="middle">{title}</textPath
             ></text
           >
-          <path class="slider-title-curve" id="curveLeft" d={calcCurve(radius, border - 2, 0, (2 * Math.PI) / 3)} />
+          <path
+            class="slider-title-curve"
+            id="curveLeft"
+            d={calcCurve(radius, border - 2, 0, (2 * Math.PI) / 3)}
+          />
           <text
             ><textPath
               class="slider-title slider-title-secondary"
@@ -158,15 +196,15 @@
     stroke-width: var(--slider-stroke);
   }
 
-.slider-range{
+  .slider-range {
     opacity: 50%;
     fill: none;
     stroke: white;
     stroke-width: calc(var(--slider-stroke) - 2px);
     stroke-linecap: round;
-}
+  }
 
- .slider-range-bg {
+  .slider-range-bg {
     fill: none;
     stroke: var(--stroke-color);
     stroke-width: var(--slider-stroke);
@@ -192,14 +230,14 @@
     height: calc(100% - 2 * var(--slider-border));
     margin: calc(var(--slider-stroke) + var(--slider-border)); */
   }
-  
+
   .slider-handle-1 {
     opacity: 40%;
-/*    fill: tomato !important;*/
-	fill: white !important;
-/*	stroke: white !important;*/
+    /*    fill: tomato !important;*/
+    fill: white !important;
+    /*	stroke: white !important;*/
   }
-  
+
   .slider-handle {
     fill: white;
     stroke: var(--stroke-color);

@@ -41,13 +41,24 @@
   <article class="devices-list">
     <div class="row">
       {#each sensors as sensor}
+        {@const thermostat = thermostats.find(
+          (v) => v.referenceSensor == sensor.id
+        )}
         <div class="col-6 col-xs-6 col-sm-6 col-md-4 col-lg-3 col-xl-3 p-0">
           <Indicator
+            title={thermostat?.name ?? "Unknown location"}
             temperature={sensor.temperature}
             humidity={Math.round(sensor.humidity)}
-            title={thermostats.find(v=>v.referenceSensor == sensor.id)?.name ?? "Unknown"}
-            titleLeft={sensor.data}
+            titleLeft={thermostat ? (thermostat?.model ?? "") +
+              " " +
+              (thermostat?.serial ?? "") : "no thermostat"}
+            signalLeft={thermostat?.rssi}
+            chargeLeft={thermostat?.battery}
+            targetTemperature={thermostat?.targetTemperature}
+            temperatureLeft={thermostat?.temperature}
             titleRight={sensor.name}
+            signalRight={sensor.rssi}
+            chargeRight={sensor.battery}
           />
         </div>
       {/each}

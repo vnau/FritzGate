@@ -3,7 +3,15 @@
   export let temperature: number;
   export let title: string = "";
   export let titleLeft: string = "";
+  export let signalLeft: number | undefined = undefined;
+  export let chargeLeft: number | undefined = undefined;
+  export let temperatureLeft: number | undefined = undefined;
+  export let targetTemperature: number | undefined = undefined;
+
   export let titleRight: string = "";
+  export let signalRight: number | undefined = undefined;
+  export let chargeRight: number | undefined = undefined;
+
   import BatteryIcon from "./BatteryIcon.svelte";
   import CircularSlider from "./CircularSlider.svelte";
   import heatIcon from "../assets/heating.svg";
@@ -22,48 +30,67 @@
     {title}
     {titleLeft}
     {titleRight}
-	rangeStart={temperature}
-	rangeStop={21}
+    rangeStart={temperature}
+    rangeStop={targetTemperature ?? temperature}
     --stroke-color="#f2c894"
   >
-    <CircularSlider bind:value={humidity} min={0} max={100} stroke={10}
-	rangeStart={40}
-	rangeStop={60}
-	--stroke-color="#9fc0de">
+    <CircularSlider
+      bind:value={humidity}
+      min={0}
+      max={100}
+      stroke={10}
+      rangeStart={40}
+      rangeStop={60}
+      --stroke-color="#9fc0de"
+    >
       <div class="slider-content">
         <span style="white-space:nowrap"
-          ><TemperatureIcon value={temperature} />{temperature.toLocaleString(undefined, {
-            minimumFractionDigits: 1,
-            maximumFractionDigits: 1,
-          })}</span
+          ><TemperatureIcon value={temperature} />{temperature.toLocaleString(
+            undefined,
+            {
+              minimumFractionDigits: 1,
+              maximumFractionDigits: 1,
+            }
+          )}</span
         >
-        <span style="white-space:nowrap"><HumidityIcon value={humidity} />{humidity}%</span>
+        <span style="white-space:nowrap"
+          ><HumidityIcon value={humidity} />{humidity}%</span
+        >
       </div>
-      <div class="badge top" data-tooltip="Target temperature {temperature}℃">
-        <img src={heatIcon} alt="" />{temperature}℃
-      </div>
+      {#if targetTemperature}
+        <div
+          class="badge top"
+          data-tooltip="Target temperature {targetTemperature}℃"
+        >
+          <img src={heatIcon} alt="" />{targetTemperature}℃
+        </div>
+      {/if}
       <div class="badge top left">
-        <SignalIcon value={-80} />
+        <SignalIcon value={signalLeft} />
       </div>
       <div class="badge top right">
-        <SignalIcon value={-90} />
+        <SignalIcon value={signalRight} />
       </div>
       <div class="badge left">
-        <BatteryIcon value={50} />
+        <BatteryIcon value={chargeLeft} />
       </div>
       <div class="badge right">
-        <BatteryIcon value={50} />
+        <BatteryIcon value={chargeRight} />
       </div>
-      <div class="badge bottom">
-        {temperature.toLocaleString(undefined, {
-          minimumFractionDigits: 1,
-          maximumFractionDigits: 1,
-        }) + "℃"}
-      </div>
+      {#if temperatureLeft}
+        <div class="badge bottom">
+          {temperatureLeft?.toLocaleString(undefined, {
+            minimumFractionDigits: 1,
+            maximumFractionDigits: 1,
+          }) + "℃"}
+        </div>
+      {/if}
       <div class="badge bottom left"></div>
-      <div class="badge bottom right">
-        <img src={settingsIcon} alt="" />
-      </div>
+      {#if false}
+        <div class="badge bottom right">
+          <img src={settingsIcon} alt="" />
+        </div>
+      {/if}
     </CircularSlider>
   </CircularSlider>
 </div>
