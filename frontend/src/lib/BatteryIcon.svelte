@@ -19,7 +19,5 @@
   max={100}
   undefinedIcon={iconError}
   {value}
-  displayValue={value === undefined || value === null
-    ? "undefined"
-    : value + "%"}
+  displayValue={value === undefined || value === null ? "undefined" : value + "%"}
 />

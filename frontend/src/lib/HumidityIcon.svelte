@@ -10,11 +10,9 @@
 
 <RangeIcon
   icons={[icon0, icon1, icon2]}
-  min={20}
-  max={80}
+  min={20 - (60 - 20)}
+  max={60 + (60 - 20)}
   undefinedIcon={iconError}
   {value}
-  displayValue={value === undefined || value === null
-    ? "undefined"
-    : value + "%"}
+  displayValue={value === undefined || value === null ? "undefined" : value + "%"}
 />

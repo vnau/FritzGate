@@ -10,12 +10,7 @@
 <img
   src={value === undefined || value === null
     ? undefinedIcon
-    : icons[
-        Math.round(
-          ((icons.length - 1) * Math.max(min, Math.min(max, value) - min)) /
-            (max - min)
-        )
-      ]}
+    : icons[Math.trunc((icons.length-0.01) * (Math.max(min, Math.min(max, value)) - min) / (max - min))]}
   alt={displayValue}
   title={displayValue}
   data-tooltip={displayValue}

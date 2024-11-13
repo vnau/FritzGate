@@ -12,11 +12,9 @@
 
 <RangeIcon
   icons={[icon0, icon1, icon2, icon3, icon4]}
-  min={-100}
-  max={-60}
+  min={-95}
+  max={-75}
   undefinedIcon={iconError}
   {value}
-  displayValue={value === undefined || value === null
-    ? "disconnected"
-    : value + " dB"}
+  displayValue={value === undefined || value === null ? "disconnected" : value + " dB"}
 />

@@ -6,11 +6,26 @@
   import PageSensors from "./Pages/PageSensors.svelte";
   import PageThermostats from "./Pages/PageThermostats.svelte";
   import WaitBox from "./lib/WaitBox.svelte";
+  import type { SensorStatus, StatusData } from "./interfaces";
+  import github from "./assets/github-mark.svg";
 
-  const apiUrl = "/api/";
-  let data: any;
+  const host = window.location.host.split(":")[0];
+  const apiUrl =
+    host == "localhost" || host == "127.0.0.1"
+      ? "http://fritzgate/api/"
+      : "/api/";
+  //const apiUrl = "/api/";
+  let data: StatusData;
   let busy = false;
   let timer: NodeJS.Timeout;
+
+  function requestNotifications() {
+    Notification.requestPermission(function (result) {
+      if (result === "granted") {
+        // new Notification("Notifications permission granted")
+      }
+    });
+  }
 
   async function fetchData() {
     const controller = new AbortController();
@@ -22,11 +37,22 @@
       const sensorsJson = await fetch(apiUrl + "status", {
         signal: controller.signal,
       });
-      const newData = await sensorsJson.json();
-      // fix rssi 0 to undefined (not connected)
-      newData?.sensors?.forEach(
-        (s: any) => (s.rssi = s.rssi ? s.rssi : undefined!)
-      );
+      const newData: StatusData = await sensorsJson.json();
+      newData?.sensors?.forEach((s) => {
+        // fix rssi 0 to undefined (not connected)
+        s.rssi = s.rssi ? s.rssi : undefined!;
+      });
+
+      if (data) {
+        var newSensors = newData.sensors.filter(
+          (v) => !data.sensors.find((ns) => ns.name == v.name)
+        );
+        if (newSensors.length > 0) {
+          new Notification(
+            "Found a new sensor(s): " + newSensors.map((v) => v.name).join(", ")
+          );
+        }
+      }
       data = newData;
       busy = false;
     } catch {
@@ -48,8 +74,22 @@
       </li>
     </ul>
     <ul>
+      <!-- <li><button on:click={requestNotifications}>Notifications</button></li> -->
       <li><a use:active class="secondary" href="/sensors">Sensors</a></li>
       <li><a use:active class="secondary" href="/heating">Heating</a></li>
+      <li>
+        <a
+          use:active
+          class="secondary"
+          href="https://github.com/vnau/FritzGate"
+          target="_blank"
+          ><img
+            src={github}
+            alt="Github"
+            style="height: 1.5em; width: 1.5em;"
+          /></a
+        >
+      </li>
     </ul>
   </nav>
   {#if !data}
@@ -59,7 +99,7 @@
     />
   {:else}
     <Route path="/" redirect="/sensors" />
-    <Route path="/sensors"><PageSensors {apiUrl} {data} /></Route>
+    <Route path="/sensors"><PageSensors {data} /></Route>
     <Route path="/heating"><PageThermostats {apiUrl} {data} /></Route>
     <Route path="/setup"><PageRouterLogin {apiUrl} {data} /></Route>
   {/if}

@@ -1,29 +1,33 @@
 <script lang="ts">
-  import type { DeviceStatus } from "../interfaces";
-  import DevicesList from "../lib/DevicesList.svelte";
+  import type { DeviceStatus, SensorStatus, StatusData } from "../interfaces";
   import WaitBox from "../lib/WaitBox.svelte";
+  import Indicator from "../lib/Indicator.svelte";
 
-  export let apiUrl: string;
-  export let data: any;
+  export let data: StatusData | null = null;
+  let sensors: SensorStatus[] | null = null;
+  let thermostats: DeviceStatus[] = [];
+  let timestamp: number = 0;
 
-  let sensors: DeviceStatus[] | null = null;
-  var timestamp = 0;
-  $: {
-    if (data) {
-      ({ sensors } = data);
-      timestamp =
-        sensors && sensors.length > 0
-          ? Math.max(
-              ...sensors
-                .sort((a, b) => a.id.localeCompare(b.id))
-                .map((v) => v.seriesTimestamp)
-            )
-          : 0;
+  $: updateSensorsAndTimestamp(data);
+
+  // Function to update sensors data
+  function updateSensorsAndTimestamp(data: StatusData | null) {
+    if (data && data.sensors) {
+      thermostats = data.thermostats ?? [];
+      sensors = data.sensors ?? [];
+      if (data.sensors.length > 0) {
+        data.sensors.sort((a, b) => a.id.localeCompare(b.id));
+        timestamp = Math.max(...data.sensors.map((v) => v.seriesTimestamp));
+      } else {
+        timestamp = 0;
+      }
+    } else {
+      sensors = null;
     }
   }
 </script>
 
-{#if !sensors}
+{#if sensors === null}
   <WaitBox
     message="trying to connect to the gateway"
     details="this buddy gossips too much with the sensors"
@@ -34,5 +38,30 @@
     details="Fritzgate uses the Theengs Decoder, which supports over 70 models of temperature sensors."
   />
 {:else}
-  <DevicesList devices={sensors} sensors={undefined} {apiUrl} />
+  <article class="devices-list">
+    <div class="row">
+      {#each sensors as sensor}
+        {@const thermostat = thermostats.find(
+          (v) => v.referenceSensor == sensor.id
+        )}
+        <div class="col-6 col-xs-6 col-sm-6 col-md-4 col-lg-3 col-xl-3 p-0">
+          <Indicator
+            title={thermostat?.name ?? "Unknown location"}
+            temperature={sensor.temperature}
+            humidity={Math.round(sensor.humidity)}
+            titleLeft={thermostat ? (thermostat?.model ?? "") +
+              " " +
+              (thermostat?.serial ?? "") : "no thermostat"}
+            signalLeft={thermostat?.rssi}
+            chargeLeft={thermostat?.battery}
+            targetTemperature={thermostat?.targetTemperature}
+            temperatureLeft={thermostat?.temperature}
+            titleRight={sensor.name}
+            signalRight={sensor.rssi}
+            chargeRight={sensor.battery}
+          />
+        </div>
+      {/each}
+    </div>
+  </article>
 {/if}
