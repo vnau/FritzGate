@@ -13,7 +13,9 @@
   const apiUrl =
     host == "localhost" || host == "127.0.0.1"
       ? "http://fritzgate/api/"
-      : "/api/";
+      : host == "vnau.github.io"
+        ? "/FritzGate/api/"
+        : "/api/";
   //const apiUrl = "/api/";
   let data: StatusData;
   let busy = false;
