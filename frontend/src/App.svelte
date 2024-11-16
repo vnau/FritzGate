@@ -6,17 +6,11 @@
   import PageSensors from "./Pages/PageSensors.svelte";
   import PageThermostats from "./Pages/PageThermostats.svelte";
   import WaitBox from "./lib/WaitBox.svelte";
-  import type { SensorStatus, StatusData } from "./interfaces";
+  import type { ApiService, SensorStatus, StatusData } from "./interfaces";
   import github from "./assets/github-mark.svg";
 
-  const host = window.location.host.split(":")[0];
-  const apiUrl =
-    host == "localhost" || host == "127.0.0.1"
-      ? "http://fritzgate/api/"
-      : host == "vnau.github.io"
-        ? "/FritzGate/api/"
-        : "/api/";
-  //const apiUrl = "/api/";
+  export let api: ApiService;
+  export let baseUrl: string;
   let data: StatusData;
   let busy = false;
   let timer: NodeJS.Timeout;
@@ -30,17 +24,14 @@
   }
 
   async function fetchData() {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => {
-      controller.abort();
-      busy = true;
-    }, 1000);
     try {
-      const sensorsJson = await fetch(apiUrl + "status", {
-        signal: controller.signal,
-      });
-      const newData: StatusData = await sensorsJson.json();
-      newData?.sensors?.forEach((s) => {
+      const newData: StatusData | undefined = await api.fetchStatus();
+      if (!newData) {
+        busy = true;
+        return;
+      }
+
+      newData.sensors?.forEach((s) => {
         // fix rssi 0 to undefined (not connected)
         s.rssi = s.rssi ? s.rssi : undefined!;
       });
@@ -58,9 +49,9 @@
       data = newData;
       busy = false;
     } catch {
+      busy = true;
       // request failed
     } finally {
-      clearTimeout(timeoutId);
       timer = setTimeout(fetchData, 2000);
     }
   }
@@ -77,8 +68,12 @@
     </ul>
     <ul>
       <!-- <li><button on:click={requestNotifications}>Notifications</button></li> -->
-      <li><a use:active class="secondary" href="/sensors">Sensors</a></li>
-      <li><a use:active class="secondary" href="/heating">Heating</a></li>
+      <li>
+        <a use:active class="secondary" href={baseUrl + "/sensors"}>Sensors</a>
+      </li>
+      <li>
+        <a use:active class="secondary" href={baseUrl + "/heating"}>Heating</a>
+      </li>
       <li>
         <a
           use:active
@@ -100,9 +95,13 @@
       details="this buddy gossips too much with sensors"
     />
   {:else}
-    <Route path="/" redirect="/sensors" />
-    <Route path="/sensors"><PageSensors {data} /></Route>
-    <Route path="/heating"><PageThermostats {apiUrl} {data} /></Route>
-    <Route path="/setup"><PageRouterLogin {apiUrl} {data} /></Route>
+    <Route path={baseUrl + "/"} redirect={baseUrl + "/sensors"} />
+    <Route path={baseUrl + "/sensors"}><PageSensors {data} /></Route>
+    <Route path={baseUrl + "/heating"}
+      ><PageThermostats {api} {data} {baseUrl} /></Route
+    >
+    <Route path={baseUrl + "/setup"}
+      ><PageRouterLogin {api} {data} {baseUrl} /></Route
+    >
   {/if}
 </main>
