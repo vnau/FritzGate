@@ -1,16 +1,15 @@
 <script lang="ts">
-  import type {
-    ApiService,
-    DeviceStatus,
-    SensorStatus,
-    StatusData,
+  import {
+    Status,
+    type ApiService,
+    type DeviceStatus,
+    type SensorStatus,
+    type StatusData,
   } from "../interfaces";
   import DevicesList from "../lib/DevicesList.svelte";
   import WaitBox from "../lib/WaitBox.svelte";
-  import { router } from "tinro";
 
   export let api: ApiService;
-  export let baseUrl: string;
   export let data: StatusData;
 
   let thermostats: DeviceStatus[] = [];
@@ -20,12 +19,12 @@
   $: {
     if (data) {
       if (
-        data?.fritz?.status == "FAILURE" ||
-        data?.fritz?.status == "NOT_CONFIGURED" ||
-        data?.fritz?.status == "CONFIGURED" ||
-        data?.fritz?.status == "CONNECTING"
+        data?.fritz?.status == Status.failure ||
+        data?.fritz?.status == Status.unconfigured ||
+        data?.fritz?.status == Status.configured ||
+        data?.fritz?.status == Status.connecting
       ) {
-        router.goto(baseUrl + "/setup");
+        location.hash = "#setup";
       }
       ({ thermostats, sensors } = data);
       timestamp =

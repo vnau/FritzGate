@@ -43,13 +43,25 @@
               >
                 <option value="" selected={device.referenceSensor === ""}
                   >{device.model}
-                  {device.serial} ({device.temperature}℃)</option
+                  {device.serial} ({device.temperature?.toLocaleString(
+                    undefined,
+                    {
+                      minimumFractionDigits: 1,
+                      maximumFractionDigits: 1,
+                    }
+                  )}℃)</option
                 >
                 {#each sensors as sensor}
                   <option
                     selected={sensor.id === device.referenceSensor}
                     value={sensor.id}
-                    >{sensor.name} ({sensor.temperature}℃)</option
+                    >{sensor.name} ({sensor.temperature?.toLocaleString(
+                      undefined,
+                      {
+                        minimumFractionDigits: 1,
+                        maximumFractionDigits: 1,
+                      }
+                    )}℃)</option
                   >
                 {/each}
                 {#if device.referenceSensor && !sensors.find((sensor) => sensor.id == device.referenceSensor)}

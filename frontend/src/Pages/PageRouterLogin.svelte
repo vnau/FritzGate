@@ -1,13 +1,11 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { router } from "tinro";
   import iotSvg from "../assets/iot.svg";
   import WaitBox from "../lib/WaitBox.svelte";
   import { type ApiService, type StatusData, Status } from "../interfaces";
 
   export let api: ApiService;
   export let data: StatusData;
-  export let baseUrl: string;
 
   let host: string;
   let pass: string;
@@ -15,9 +13,8 @@
   let user: string;
 
   let submitForm = async (e: any): Promise<boolean> => {
-    console.log("submit");
     await api.setConfig(host, user, pass);
-    status = "CONFIGURED";
+    status = Status.configured;
     return false;
   };
 
@@ -27,7 +24,7 @@
       status !== data?.fritz?.status &&
       data?.fritz?.status === Status.connected
     ) {
-      router.goto(baseUrl + "/heating");
+      location.hash = "#heating";
     } else {
       status = data?.fritz?.status;
       host ??= data?.fritz?.host;
@@ -47,61 +44,75 @@
   />
 {:else}
   <article>
-    <hgroup>
-      <div class="message-splash">
-        <img src={iotSvg} class="wait-image" alt="" />
-        <h4>
-          {status === "CONNECTED"
-            ? "update credentials for FRITZ!Box"
-            : "connect to FRITZ!Box"}
-        </h4>
-        <p>
-          Set up a hostname (in most cases <i>fritz.box</i> or
-          <i>192.168.178.1</i>), username and password to connect to the
-          FRITZ!Box SmartHome.
-        </p>
+    <div class="row">
+      <div class="col-12 col-md-6 col-lg-6 col-xl-6">
+        <hgroup>
+          <div class="message-splash">
+            <img src={iotSvg} class="wait-image" alt="" />
+            <h4>
+              {status === Status.connected
+                ? "update credentials for FRITZ!Box"
+                : "connect to FRITZ!Box"}
+            </h4>
+          </div>
+        </hgroup>
       </div>
-    </hgroup>
-    {#if status === Status.failure}
-      <center
-        ><p>
-          <mark
-            >failed to connect to FRITZ!Box with the provided credentials</mark
+      <div class="col-12 col-md-6 col-lg-6 col-xl-6">
+        <hgroup>
+          <div class="message-splash">
+            <p>
+              Set up a hostname (in most cases <i>fritz.box</i> or
+              <i>192.168.178.1</i>), username and password to connect to the
+              FRITZ!Box SmartHome.
+            </p>
+          </div>
+        </hgroup>
+        {#if status === Status.failure}
+          <center
+            ><p>
+              <mark
+                >failed to connect to FRITZ!Box with the provided credentials</mark
+              >
+            </p></center
           >
-        </p></center
-      >
-    {/if}
-    <form on:submit|preventDefault={submitForm} autocomplete="off">
-      <input
-        type="text"
-        name="ip"
-        placeholder="Router address (should be 192.168.179.1 or fritz.box for most FRITZ!Boxes)"
-        required
-        bind:value={host}
-        autocomplete="off"
-      />
-      <input
-        type="text"
-        name="login"
-        placeholder="FRITZ!Box username"
-        required
-        bind:value={user}
-        autocomplete="off"
-      />
-      <input
-        type="password"
-        name="pass"
-        placeholder="Password"
-        required
-        bind:value={pass}
-        autocomplete="off"
-      />
+        {/if}
+        <form
+          class="fritzform"
+          on:submit|preventDefault={submitForm}
+          autocomplete="off"
+        >
+          <input
+            type="text"
+            name="ip"
+            placeholder="Router address (should be 192.168.179.1 or fritz.box for most FRITZ!Boxes)"
+            required
+            bind:value={host}
+            autocomplete="off"
+          />
+          <input
+            type="text"
+            name="login"
+            placeholder="FRITZ!Box username"
+            required
+            bind:value={user}
+            autocomplete="off"
+          />
+          <input
+            type="password"
+            name="pass"
+            placeholder="Password"
+            required
+            bind:value={pass}
+            autocomplete="off"
+          />
 
-      <input
-        type="submit"
-        disabled={!host || !user || !pass}
-        value="Connect FritzGate to FRITZ!Box"
-      />
-    </form>
+          <input
+            type="submit"
+            disabled={!host || !user || !pass}
+            value="Connect FritzGate to FRITZ!Box"
+          />
+        </form>
+      </div>
+    </div>
   </article>
 {/if}

@@ -1,19 +1,23 @@
 <script lang="ts">
   import "./app.scss";
-  import { Route, active } from "tinro";
 
   import PageRouterLogin from "./Pages/PageRouterLogin.svelte";
   import PageSensors from "./Pages/PageSensors.svelte";
   import PageThermostats from "./Pages/PageThermostats.svelte";
   import WaitBox from "./lib/WaitBox.svelte";
-  import type { ApiService, SensorStatus, StatusData } from "./interfaces";
+  import type { ApiService, StatusData } from "./interfaces";
   import github from "./assets/github-mark.svg";
 
   export let api: ApiService;
-  export let baseUrl: string;
-  let data: StatusData;
+  let state: StatusData | undefined = undefined;
+  let page: string = location.hash;
   let busy = false;
   let timer: NodeJS.Timeout;
+
+  function routeChange() {
+    console.log(location.hash);
+    page = location.hash;
+  }
 
   function requestNotifications() {
     Notification.requestPermission(function (result) {
@@ -31,14 +35,9 @@
         return;
       }
 
-      newData.sensors?.forEach((s) => {
-        // fix rssi 0 to undefined (not connected)
-        s.rssi = s.rssi ? s.rssi : undefined!;
-      });
-
-      if (data) {
+      if (state) {
         var newSensors = newData.sensors.filter(
-          (v) => !data.sensors.find((ns) => ns.name == v.name)
+          (v) => !state?.sensors.find((ns) => ns.name == v.name)
         );
         if (newSensors.length > 0) {
           new Notification(
@@ -46,7 +45,16 @@
           );
         }
       }
-      data = newData;
+
+      state = {
+        fritz: { ...newData.fritz },
+        sensors: newData.sensors.map((v) => ({
+          ...v,
+          rssi: v.rssi ? v.rssi : undefined!,
+        })),
+        thermostats: newData.thermostats.map((v) => ({ ...v })),
+      };
+
       busy = false;
     } catch {
       busy = true;
@@ -58,6 +66,7 @@
   fetchData();
 </script>
 
+<svelte:window on:hashchange={routeChange} />
 <main>
   <nav>
     <ul>
@@ -69,14 +78,13 @@
     <ul>
       <!-- <li><button on:click={requestNotifications}>Notifications</button></li> -->
       <li>
-        <a use:active class="secondary" href={baseUrl + "/sensors"}>Sensors</a>
+        <a class="secondary" href={"#sensors"}>Sensors</a>
       </li>
       <li>
-        <a use:active class="secondary" href={baseUrl + "/heating"}>Heating</a>
+        <a class="secondary" href={"#heating"}>Heating</a>
       </li>
       <li>
         <a
-          use:active
           class="secondary"
           href="https://github.com/vnau/FritzGate"
           target="_blank"
@@ -89,19 +97,14 @@
       </li>
     </ul>
   </nav>
-  {#if !data}
+  {#if !state}
     <WaitBox
       message="trying to connect to the FritzGate"
       details="this buddy gossips too much with sensors"
     />
-  {:else}
-    <Route path={baseUrl + "/"} redirect={baseUrl + "/sensors"} />
-    <Route path={baseUrl + "/sensors"}><PageSensors {data} /></Route>
-    <Route path={baseUrl + "/heating"}
-      ><PageThermostats {api} {data} {baseUrl} /></Route
-    >
-    <Route path={baseUrl + "/setup"}
-      ><PageRouterLogin {api} {data} {baseUrl} /></Route
-    >
+  {:else if page === "#sensors"}<PageSensors data={state} />
+  {:else if page === "#heating"}<PageThermostats {api} data={state} />
+  {:else if page === "#setup"}<PageRouterLogin {api} data={state} />
+  {:else}<PageSensors data={state} />
   {/if}
 </main>

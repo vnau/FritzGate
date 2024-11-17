@@ -14,7 +14,10 @@
 <div class="row">
   <div class="col {device.referenceSensor ? 'strikeout' : ''}" data-tooltip="Actual temperature {device.temperature}℃">
     <TemperatureIcon value={device.temperature}/>
-    {device.temperature}℃
+    {device.temperature?.toLocaleString(undefined, {
+      minimumFractionDigits: 1,
+      maximumFractionDigits: 1,
+    })}℃
   </div>
   {#if device.targetTemperature}
     <div class="col" data-tooltip="Target temperature {device.targetTemperature}℃">

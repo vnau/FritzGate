@@ -35,7 +35,7 @@
 {:else if sensors.length === 0}
   <WaitBox
     message="trying hard to find sensors nearby"
-    details="Fritzgate uses the Theengs Decoder, which supports over 70 models of temperature sensors."
+    details="FritzGate uses the Theengs Decoder to support over 70 models of temperature sensors."
   />
 {:else}
   <article class="devices-list">

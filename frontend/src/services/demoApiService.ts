@@ -5,13 +5,19 @@ export class DemoApiService implements ApiService {
     private sensors: SensorStatus[] = [];
     private url!: string;
 
-    constructor(baseUrl: string) {
-        this.url = baseUrl + "/status.json";
+    constructor() {
+        const baseUrl = window.location.origin + window.location.pathname
+        this.url = baseUrl + "status.json";
+    }
+
+    private async fetchStatusInt(): Promise<StatusData> {
+        const response = await fetch(this.url);
+        return await response.json();
     }
 
     async ensureStatusLoaded(): Promise<StatusData> {
         if (!this.statusPromise) {
-            this.statusPromise = fetch(this.url).then(resp => resp.json());
+            this.statusPromise = this.fetchStatusInt();
             var data = await this.statusPromise;
             data.fritz = { host: 'fritzbox', user: 'user', status: Status.unconfigured };
             for (const sensor of data.sensors) {
