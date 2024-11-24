@@ -1,4 +1,8 @@
 # FritzGate
+
+[![PlatformIO CI](https://github.com/vnau/FritzGate/actions/workflows/platformio.yml/badge.svg)](https://github.com/vnau/FritzGate/actions/workflows/platformio.yml)
+[![Frontend CI](https://github.com/vnau/FritzGate/actions/workflows/deploy.yml/badge.svg)](https://github.com/vnau/FritzGate/actions/workflows/deploy.yml)
+
 **FritzGate** transforms your **Ai Thinker board** into a smart thermostat controller. This project enables seamless control of thermostats connected to a **FRITZ!Box**, integrating any of 70+ temperature sensors models for precise temperature control.
 
 ![FritzGate screenshot](docs/FritzGate_Screenshot.svg)
