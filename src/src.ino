@@ -8,7 +8,7 @@
 #include "./src/bluetooth/TheengsSensorsScanner.h"
 
 #include <EEPROM.h>
-#include <esp_http_server.h> //TODO
+#include <esp_http_server.h>
 #include <HTTPClient.h>
 #include <NTPClient.h>
 #include <string>
@@ -17,15 +17,25 @@
 #include <ArduinoJson.h>
 #include <sstream>
 #include <time.h>
+#include <esp_task_wdt.h>
 
-// With this macro the board will try to read a wifi ssid and a pass from a camera if they're not specified.
-// This option defined only when built with Platformio.
+// If this macro is defined, the board will try to read WiFi SSID and password from a QR code using camera if not specified manually.
+// This is enabled only when built with PlatformIO.
 #ifdef READ_WIFI_QR_CODE
 #include "./src/qrcode/qr_code_reader.h"
 #endif
 
-// ledPin refers to ESP32-CAM GPIO 4 (flashlight)
+// Watchdog timer: The device will restart automatically if
+// there are no updates from FritzBox and no sensor data for 5 minutes
+#define WATCHDOG_TIMEOUT 60 * 5
+
+// FritzBox settings refresh interval: 30 seconds
+#define FRITZGATE_REFRESH_TIMEOUT 30
+
+// GPIO for ESP32-CAM flash (LED), typically GPIO 4
 #define FLASH_GPIO_NUM 4
+
+// Maximum number of sensors that can be handled
 #define MAX_SENSORS_COUNT 20
 #define MAX_ID_LENGTH 18
 #define NTP_SERVER "europe.pool.ntp.org"
@@ -45,31 +55,34 @@ struct Config
   // Wifi network password
   char wifi_pass[64] = {};
 
-  // IP address of your router. This should be "192.168.179.1" for most FRITZ!Boxes
+  // IP address of your router. For most FRITZ!Boxes, this is "192.168.179.1"
   char fritz_host[32] = DEFAULT_FRITZBOX_HOST;
 
-  // The username if you created an account, "admin" otherwise
+  // Username for FritzBox account. Default is "admin" if no custom account was created.
   char fritz_user[32] = {};
 
-  // The password for the fritzbox account.
+  // Password for the FritzBox account
   char fritz_pass[32] = {};
 
-  // sensors bindings
+  // Sensor bindings (thermostat-sensor pairings)
   char sensors_bindings[MAX_SENSORS_COUNT][2][MAX_ID_LENGTH] = {};
 };
 
+// Default and active configurations
 Config defaultConfig;
 Config config = {};
 
-// json with fritzbox smart home control settings
+// Tracks the last refresh timestamp for FritzBox Smart Home control
 unsigned long fritzSmartHomeControlLastRefreshMillis = 0;
 
-//char buffer[5 * 4 * 2 * 60 * 24 / 5] = {}; // overflowed by 1136 bytes
+// char buffer[5 * 4 * 2 * 60 * 24 / 5] = {}; // overflowed by 1136 bytes
 
+// Holds pointers to active sensors
 static int sensorsCount = 0;
 static Sensor *sensors[MAX_SENSORS_COUNT] = {};
 std::vector<Thermostat> thermostats;
 
+// FritzBox connection states
 const char FRITZ_STATUS_CONFIGURED[] = "CONFIGURED";
 const char FRITZ_STATUS_NOT_CONFIGURED[] = "NOT_CONFIGURED";
 const char FRITZ_STATUS_CONNECTION[] = "CONNECTING";
@@ -174,7 +187,6 @@ class SensorsAdvertisedDeviceCallbacks : public SensorScannerCallback
   void onResult(Sensor *sensorData)
   {
     long timestamp = ntpClient.getEpochTime();
-
     Sensor *sensor = GetSensorById(sensorData->id.c_str());
 
     long prevTimestamp;
@@ -256,6 +268,7 @@ bool syncFritzBox()
           updates = true;
         }
       }
+      feedWatchdog();
     }
 
     if (updates)
@@ -277,11 +290,25 @@ bool syncFritzBox()
   return false;
 }
 
+void feedWatchdog()
+{
+  Serial.println("Resetting watchdog...");
+  esp_task_wdt_reset();
+}
+
+void setupWatchdog()
+{
+  Serial.println("Configuring watchdog...");
+  esp_task_wdt_init(WATCHDOG_TIMEOUT, true); // enable panic so ESP32 restarts
+  esp_task_wdt_add(NULL);                    // add current thread to WDT watch
+}
+
 /**
  * Setup WiFi connection.
  */
 void setupWIFI()
 {
+  Serial.println("Configuring WIFI...");
   WiFi.mode(WIFI_MODE_NULL);
   WiFi.setHostname(DEVICE_HOSTNAME);
   WiFi.mode(WIFI_STA);
@@ -406,6 +433,7 @@ void setup()
   Serial.begin(115200);
   Serial.println("Starting Arduino application...");
 
+  setupWatchdog();
   setupConfig();
 
 #ifdef READ_WIFI_QR_CODE
@@ -465,7 +493,7 @@ void loop()
       strlen(config.fritz_host) > 0 &&
       strlen(config.fritz_user) > 0 &&
       strlen(config.fritz_pass) > 0 &&
-      millis() - fritzSmartHomeControlLastRefreshMillis >= 1 * 30 * 1000UL)
+      millis() - fritzSmartHomeControlLastRefreshMillis >= (FRITZGATE_REFRESH_TIMEOUT) * 1000UL)
   {
     fritzSmartHomeControlLastRefreshMillis = millis();
     syncFritzBox();
