@@ -18,8 +18,8 @@
     "utilities/accessibility": false,
     "utilities/reduce-motion": false));
 
-@import "./pico-theme.scss";
-@import "./pico-bootstrap.scss";
+@use "./pico-theme.scss";
+@use "./pico-bootstrap.scss";
 
 .message-splash {
   text-align: center;

@@ -78,10 +78,10 @@
     <ul>
       <!-- <li><button on:click={requestNotifications}>Notifications</button></li> -->
       <li>
-        <a class="secondary" href={"#sensors"}>Sensors</a>
+        <a class="secondary" href={"#sensors"}>Dashboard</a>
       </li>
       <li>
-        <a class="secondary" href={"#heating"}>Heating</a>
+        <a class="secondary" href={"#heating"}>Settings</a>
       </li>
       <li>
         <a

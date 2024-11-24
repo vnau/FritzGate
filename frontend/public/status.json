@@ -1,4 +1,9 @@
 {
+  "fritz": {
+    "host": "fritz.box",
+    "user": "demo",
+    "status": "NOT_CONFIGURED"
+  },
   "sensors": [
     {
       "name": "Govee H5075 01CB",

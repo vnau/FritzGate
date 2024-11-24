@@ -18,6 +18,6 @@ describe('sensors page', () => {
       cy.intercept('GET', '/api/status', json)
     });
 
-    cy.visit('http://localhost:5173/heating')
+    cy.visit('http://localhost:5173/#heating')
   });
 })

@@ -61,9 +61,13 @@
         <hgroup>
           <div class="message-splash">
             <p>
-              Set up a hostname (in most cases <i>fritz.box</i> or
-              <i>192.168.178.1</i>), username and password to connect to the
-              FRITZ!Box SmartHome.
+              Set up a hostname (in most cases <a
+                href="https://fritz.box"
+                target="_blank">fritz.box</a
+              >
+              or
+              <a href="https://192.168.178.1" target="_blank">192.168.178.1</a
+              >), username and password to connect to the FRITZ!Box SmartHome.
             </p>
           </div>
         </hgroup>

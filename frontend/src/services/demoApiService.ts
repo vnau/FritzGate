@@ -19,7 +19,7 @@ export class DemoApiService implements ApiService {
         if (!this.statusPromise) {
             this.statusPromise = this.fetchStatusInt();
             var data = await this.statusPromise;
-            data.fritz = { host: 'fritzbox', user: 'user', status: Status.unconfigured };
+            data.fritz = { host: 'fritz.box', user: 'demo', status: Status.unconfigured };
             for (const sensor of data.sensors) {
                 setTimeout(() => this.sensors.push(sensor), Math.random() * 8000);
             }
