@@ -1,5 +1,7 @@
 # FritzGate
 
+[![en](https://img.shields.io/badge/lang-en-blue.svg)](README.md)
+[![de](https://img.shields.io/badge/lang-de-red.svg)](README.de.md)
 [![PlatformIO CI](https://github.com/vnau/FritzGate/actions/workflows/platformio.yml/badge.svg)](https://github.com/vnau/FritzGate/actions/workflows/platformio.yml)
 [![Frontend CI](https://github.com/vnau/FritzGate/actions/workflows/deploy.yml/badge.svg)](https://github.com/vnau/FritzGate/actions/workflows/deploy.yml)
 
