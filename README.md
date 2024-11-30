@@ -3,13 +3,13 @@
 [![PlatformIO CI](https://github.com/vnau/FritzGate/actions/workflows/platformio.yml/badge.svg)](https://github.com/vnau/FritzGate/actions/workflows/platformio.yml)
 [![Frontend CI](https://github.com/vnau/FritzGate/actions/workflows/deploy.yml/badge.svg)](https://github.com/vnau/FritzGate/actions/workflows/deploy.yml)
 
-**FritzGate** transforms your **Ai Thinker board** into a smart thermostat controller. This project enables seamless control of thermostats connected to a **FRITZ!Box**, integrating any of 70+ temperature sensors models for precise temperature control.
+**FritzGate** transforms your **Ai Thinker board** into a smart thermostat controller. This project enables seamless control of thermostats connected to a **FRITZ!Box** (FRITZ!DECT 301 and FRITZ!DECT 302), integrating for precise temperature control any of 70+ temperature sensors from leading vendors such as Govee, Xiaomi, Shelly, Ruuvi, Inkbird, SwitchBot, and ThermoPro. For a complete list, view the [list of  Theengs-compatible devices](https://decoder.theengs.io/devices/devices.html).
 
-![FritzGate screenshot](docs/FritzGate_Screenshot.svg)
+[![FritzGate screenshot](docs/FritzGate_Screenshot.svg)](https://vnau.github.io/FritzGate/)
 
 ## Demo
 
-You can view a demo of the FritzGate interface [here](https://vnau.github.io/FritzGate/).
+A demo of the FritzGate interface is available [here](https://vnau.github.io/FritzGate/).
 
 ## Features
 
