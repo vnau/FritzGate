@@ -13,34 +13,30 @@
   export let chargeRight: number | undefined = undefined;
 
   import BatteryIcon from "./BatteryIcon.svelte";
-  import CircularSlider from "./CircularSlider.svelte";
   import heatIcon from "../assets/heating.svg";
   import HumidityIcon from "./HumidityIcon.svelte";
   import settingsIcon from "../assets/settings.svg";
   import SignalIcon from "./SignalIcon.svelte";
   import TemperatureIcon from "./TemperatureIcon.svelte";
+  import Gauge from "svelte-gauge";
 </script>
 
 <div style="width: 100%;aspect-ratio: 1/1">
-  <CircularSlider
+  <Gauge
+    class="indicator-gauge"
     bind:value={temperature}
-    min={10}
-    max={30}
+    start={10}
+    stop={30}
     stroke={10}
-    {title}
-    {titleLeft}
-    {titleRight}
-    rangeStart={temperature}
-    rangeStop={targetTemperature ?? temperature}
+    titleAngle={180}
+    titles={[title, titleRight, titleLeft]}
+    ranges={[[temperature, targetTemperature ?? temperature]]}
     --stroke-color="#f2c894"
   >
-    <CircularSlider
+    <Gauge
       bind:value={humidity}
-      min={0}
-      max={100}
       stroke={10}
-      rangeStart={40}
-      rangeStop={60}
+      ranges={[[40, 60]]}
       --stroke-color="#9fc0de"
     >
       <div class="slider-content">
@@ -91,8 +87,8 @@
           <img src={settingsIcon} alt="" />
         </div>
       {/if}
-    </CircularSlider>
-  </CircularSlider>
+    </Gauge>
+  </Gauge>
 </div>
 
 <!-- 
@@ -101,15 +97,14 @@
    -->
 <!-- <CircularSlider {value} angle={(2 * 3.14 * value) / 365} /> -->
 
-<style>
+<style lang="scss">
   .slider-content {
     top: 50%;
     left: 50%;
-    font-family: "Calibri", sans-serif;
-    font-size: calc(var(--slider-radius) / 2.5);
+    font-size: calc(var(--gauge-radius) / 2.5);
     font-weight: 300;
     transform: translate(-50%, -50%);
-    position: absolute;
+    position: relative;
     line-height: normal;
     text-align: center;
   }
@@ -120,38 +115,39 @@
   }
   .badge.top {
     left: 50%;
-    top: 8%;
+    top: 2%;
     transform: translate(-50%, 0);
+    text-wrap: nowrap;
   }
 
   .badge.top.left {
-    left: 13%;
+    left: 8%;
     top: 13%;
     transform: none;
   }
 
   .badge.top.right {
-    right: 13%;
+    right: 0%;
     top: 13%;
-    -webkit-transform: scaleX(-1);
-    transform: scaleX(-1);
+    -webkit-transform: translate(20%, 0%) scaleX(-1);
+    transform: translate(20%, 0%) scaleX(-1);
   }
 
   .badge.left {
-    left: 5%;
+    left: 0%;
     top: 50%;
     transform: translate(0, -50%);
   }
 
   .badge.right {
-    right: 5%;
+    right: 0%;
     top: 50%;
     transform: translate(0, -50%);
   }
 
   .badge.bottom {
     left: 50%;
-    bottom: 8%;
+    bottom: 2%;
     transform: translate(-50%, 0);
   }
 
@@ -166,5 +162,15 @@
     top: auto;
     right: 15%;
     bottom: 15%;
+  }
+
+  :global(.indicator-gauge) {
+    :global(.titles-container) {
+      color: lightslategray;
+      font-size: 0.7em;
+      :global(:first-child) {
+        font-size: 1.5em;
+      }
+    }
   }
 </style>
