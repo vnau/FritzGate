@@ -91,22 +91,16 @@
   </Gauge>
 </div>
 
-<!-- 
-    tomato
-    v#3399FF
-   -->
-<!-- <CircularSlider {value} angle={(2 * 3.14 * value) / 365} /> -->
-
 <style lang="scss">
   .slider-content {
     top: 50%;
+    width: 100%;
     left: 50%;
     font-size: calc(var(--gauge-radius) / 2.5);
     font-weight: 300;
     transform: translate(-50%, -50%);
-    position: relative;
-    line-height: normal;
-    text-align: center;
+    position: absolute;
+    display: grid;
   }
 
   .badge {
