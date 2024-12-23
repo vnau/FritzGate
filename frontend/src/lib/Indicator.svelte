@@ -28,15 +28,15 @@
     start={10}
     stop={30}
     stroke={10}
-    titleAngle={180}
-    titles={[title, titleRight, titleLeft]}
-    ranges={[[temperature, targetTemperature ?? temperature]]}
+    labelsCentered={true}
+    labels={[titleLeft, title, titleRight]}
+    segments={[[temperature, targetTemperature ?? temperature]]}
     --stroke-color="#f2c894"
   >
     <Gauge
       bind:value={humidity}
       stroke={10}
-      ranges={[[40, 60]]}
+      segments={[[40, 60]]}
       --stroke-color="#9fc0de"
     >
       <div class="slider-content">
