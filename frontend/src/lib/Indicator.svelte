@@ -12,13 +12,13 @@
   export let signalRight: number | undefined = undefined;
   export let chargeRight: number | undefined = undefined;
 
-  import BatteryIcon from "./BatteryIcon.svelte";
+  import Gauge from "svelte-gauge";
   import heatIcon from "../assets/heating.svg";
-  import HumidityIcon from "./HumidityIcon.svelte";
   import settingsIcon from "../assets/settings.svg";
+  import BatteryIcon from "./BatteryIcon.svelte";
+  import HumidityIcon from "./HumidityIcon.svelte";
   import SignalIcon from "./SignalIcon.svelte";
   import TemperatureIcon from "./TemperatureIcon.svelte";
-  import Gauge from "svelte-gauge";
 </script>
 
 <div style="width: 100%;aspect-ratio: 1/1">
